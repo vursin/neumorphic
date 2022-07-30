@@ -5,9 +5,10 @@
 import 'package:flutter/cupertino.dart'
     show CupertinoTextThemeData, CupertinoTheme, CupertinoThemeData;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart'
     show MaterialLocalizations, ScriptCategory, Theme;
+import 'package:flutter/widgets.dart';
+
 import 'theme_data.dart';
 
 export 'theme_data.dart' show Brightness, NeuThemeData;
@@ -38,11 +39,11 @@ class NeuTheme extends StatelessWidget {
   ///
   /// The [data] and [child] arguments must not be null.
   const NeuTheme({
-    Key key,
-    @required this.data,
+    Key? key,
+    required this.data,
     this.isNeumorphicAppTheme = false,
-    @required this.child,
-  })  : super(key: key);
+    required this.child,
+  }) : super(key: key);
 
   /// Specifies the color and typography values for descendant widgets.
   final NeuThemeData data;
@@ -122,11 +123,12 @@ class NeuTheme extends StatelessWidget {
   ///   );
   /// }
   /// ```
-  static NeuThemeData of(BuildContext context, {bool shadowThemeOnly = false}) {
-    final _InheritedTheme inheritedTheme =
+  static NeuThemeData? of(BuildContext context,
+      {bool shadowThemeOnly = false}) {
+    final _InheritedTheme? inheritedTheme =
         context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
     if (shadowThemeOnly) {
-      if (inheritedTheme.theme.isNeumorphicAppTheme) {
+      if (inheritedTheme == null || inheritedTheme.theme.isNeumorphicAppTheme) {
         return null;
       }
       return inheritedTheme.theme.data;
@@ -134,31 +136,28 @@ class NeuTheme extends StatelessWidget {
 
     final MaterialLocalizations localizations =
         MaterialLocalizations.of(context);
-    final ScriptCategory category =
-        localizations.scriptCategory ?? ScriptCategory.englishLike;
-    final NeuThemeData theme = inheritedTheme.theme.data ?? _kFallbackTheme;
+    final ScriptCategory category = localizations.scriptCategory;
+    final NeuThemeData theme = inheritedTheme?.theme.data ?? _kFallbackTheme;
     return NeuThemeData.localize(
         theme, theme.typography.geometryThemeFor(category));
   }
 
   @override
-  Widget build(BuildContext context) {
-    return _InheritedTheme(
-      theme: this,
-      child: CupertinoTheme(
-        // We're using a NeuBasedCupertinoTheme here instead of a
-        // CupertinoThemeData because it defers some properties to the Material
-        // ThemeData.
-        data: NeuBasedCupertinoTheme(
-          materialTheme: data.themeData,
+  Widget build(BuildContext context) => _InheritedTheme(
+        theme: this,
+        child: CupertinoTheme(
+          // We're using a NeuBasedCupertinoTheme here instead of a
+          // CupertinoThemeData because it defers some properties to the Material
+          // ThemeData.
+          data: NeuBasedCupertinoTheme(
+            materialTheme: data.themeData,
+          ),
+          child: IconTheme(
+            data: data.iconTheme,
+            child: child,
+          ),
         ),
-        child: IconTheme(
-          data: data.iconTheme,
-          child: child,
-        ),
-      ),
-    );
-  }
+      );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -170,16 +169,16 @@ class NeuTheme extends StatelessWidget {
 
 class _InheritedTheme extends InheritedTheme {
   const _InheritedTheme({
-    Key key,
-    @required this.theme,
-    @required Widget child,
-  })  : super(key: key, child: child);
+    Key? key,
+    required this.theme,
+    required Widget child,
+  }) : super(key: key, child: child);
 
   final NeuTheme theme;
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final _InheritedTheme ancestorTheme =
+    final _InheritedTheme? ancestorTheme =
         context.findAncestorWidgetOfExactType<_InheritedTheme>();
     return identical(this, ancestorTheme)
         ? child
@@ -196,17 +195,17 @@ class _InheritedTheme extends InheritedTheme {
 /// [NeuThemeData.lerp] method.
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
-class NeumorphicThemeDataTween extends Tween<NeuThemeData> {
+class NeumorphicThemeDataTween extends Tween<NeuThemeData?> {
   /// Creates a [NeuThemeData] tween.
   ///
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  NeumorphicThemeDataTween({NeuThemeData begin, NeuThemeData end})
+  NeumorphicThemeDataTween({NeuThemeData? begin, NeuThemeData? end})
       : super(begin: begin, end: end);
 
   @override
-  NeuThemeData lerp(double t) => NeuThemeData.lerp(begin, end, t);
+  NeuThemeData lerp(double t) => NeuThemeData.lerp(begin!, end!, t);
 }
 
 /// Animated version of [NeuTheme] which automatically transitions the colors,
@@ -229,15 +228,15 @@ class AnimatedNeuTheme extends ImplicitlyAnimatedWidget {
   /// By default, the theme transition uses a linear curve. The [data] and
   /// [child] arguments must not be null.
   const AnimatedNeuTheme({
-    Key key,
-    @required this.data,
+    Key? key,
+    required this.data,
     this.isNeumorphicAppTheme = false,
     this.isMaterialAppTheme = false,
     Curve curve = Curves.linear,
     Duration duration = _kThemeAnimationDuration,
-    VoidCallback onEnd,
-    @required this.child,
-  })  : super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+    VoidCallback? onEnd,
+    required this.child,
+  }) : super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// Specifies the color and typography values for descendant widgets.
   final NeuThemeData data;
@@ -254,34 +253,36 @@ class AnimatedNeuTheme extends ImplicitlyAnimatedWidget {
   final Widget child;
 
   @override
-  _AnimatedThemeState createState() => _AnimatedThemeState();
+  AnimatedWidgetBaseState createState() => _AnimatedThemeState();
 }
 
 class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedNeuTheme> {
-  NeumorphicThemeDataTween _data;
-  NeumorphicThemeDataTween _mData;
+  NeumorphicThemeDataTween? _data;
+  NeumorphicThemeDataTween? _mData;
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
     _data = visitor(_data, widget.data,
-        (dynamic value) => NeumorphicThemeDataTween(begin: value));
+            (value) => NeumorphicThemeDataTween(begin: value))
+        as NeumorphicThemeDataTween?;
     _mData = visitor(_mData, widget.data.themeData,
-        (dynamic value) => NeumorphicThemeDataTween(begin: value));
+            (value) => NeumorphicThemeDataTween(begin: value))
+        as NeumorphicThemeDataTween?;
+    assert(_data != null);
+    assert(_mData != null);
   }
 
   @override
-  Widget build(BuildContext context) {
-    return NeuTheme(
-      // isMaterialAppTheme: widget.isMaterialAppTheme,
-      isNeumorphicAppTheme: true,
-      data: _mData.evaluate(animation),
-      child: NeuTheme(
-        isNeumorphicAppTheme: widget.isNeumorphicAppTheme,
-        data: _data.evaluate(animation),
-        child: widget.child,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => NeuTheme(
+        // isMaterialAppTheme: widget.isMaterialAppTheme,
+        isNeumorphicAppTheme: true,
+        data: _mData!.evaluate(animation)!,
+        child: NeuTheme(
+          isNeumorphicAppTheme: widget.isNeumorphicAppTheme,
+          data: _data!.evaluate(animation)!,
+          child: widget.child,
+        ),
+      );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
@@ -297,17 +298,16 @@ class NeuBasedCupertinoTheme extends CupertinoThemeData {
   ///
   /// The [materialTheme] parameter must not be null.
   NeuBasedCupertinoTheme({
-    @required NeuThemeData materialTheme,
+    required NeuThemeData materialTheme,
   }) : this._(
           materialTheme,
-          (materialTheme.cupertinoOverrideTheme ?? const CupertinoThemeData())
-              .noDefault(),
+          (materialTheme.cupertinoOverrideTheme ?? const CupertinoThemeData()),
         );
 
   NeuBasedCupertinoTheme._(
     this._neuThemeData,
     this._cupertinoOverrideTheme,
-  )   : super.raw(
+  ) : super.raw(
           _cupertinoOverrideTheme.brightness,
           _cupertinoOverrideTheme.primaryColor,
           _cupertinoOverrideTheme.primaryContrastingColor,
@@ -350,25 +350,24 @@ class NeuBasedCupertinoTheme extends CupertinoThemeData {
   /// instead.
   @override
   NeuBasedCupertinoTheme copyWith({
-    Brightness brightness,
-    Color primaryColor,
-    Color primaryContrastingColor,
-    CupertinoTextThemeData textTheme,
-    Color barBackgroundColor,
-    Color scaffoldBackgroundColor,
-  }) {
-    return NeuBasedCupertinoTheme._(
-      _neuThemeData,
-      _cupertinoOverrideTheme.copyWith(
-        brightness: brightness,
-        primaryColor: primaryColor,
-        primaryContrastingColor: primaryContrastingColor,
-        textTheme: textTheme,
-        barBackgroundColor: barBackgroundColor,
-        scaffoldBackgroundColor: scaffoldBackgroundColor,
-      ),
-    );
-  }
+    Brightness? brightness,
+    Color? primaryColor,
+    Color? primaryContrastingColor,
+    CupertinoTextThemeData? textTheme,
+    Color? barBackgroundColor,
+    Color? scaffoldBackgroundColor,
+  }) =>
+      NeuBasedCupertinoTheme._(
+        _neuThemeData,
+        _cupertinoOverrideTheme.copyWith(
+          brightness: brightness,
+          primaryColor: primaryColor,
+          primaryContrastingColor: primaryContrastingColor,
+          textTheme: textTheme,
+          barBackgroundColor: barBackgroundColor,
+          scaffoldBackgroundColor: scaffoldBackgroundColor,
+        ),
+      );
 
   @override
   CupertinoThemeData resolveFrom(BuildContext context, {bool nullOk = false}) {

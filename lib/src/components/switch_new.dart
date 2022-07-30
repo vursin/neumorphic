@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:neumorphic/src/animations/animated_scale.dart';
 import 'package:neumorphic/src/components/neu_card.dart';
 import 'package:neumorphic/src/neumorphic/theme.dart';
 import 'package:neumorphic/src/params.dart';
@@ -23,14 +22,14 @@ class NeuSwitchNewStyle {
     this.disableDepth,
   });
 
-  final double trackDepth;
-  final Color activeTrackColor;
-  final Color inactiveTrackColor;
-  final Color activeThumbColor;
-  final Color inactiveThumbColor;
+  final double? trackDepth;
+  final Color? activeTrackColor;
+  final Color? inactiveTrackColor;
+  final Color? activeThumbColor;
+  final Color? inactiveThumbColor;
   final CurveType curveType;
-  final double thumbDepth;
-  final bool disableDepth;
+  final double? thumbDepth;
+  final bool? disableDepth;
 
   @override
   bool operator ==(Object other) =>
@@ -102,7 +101,7 @@ class NeuSwitchNewStyle {
 class NeuSwitchNew extends StatelessWidget {
   const NeuSwitchNew({
     this.style = const NeuSwitchNewStyle(),
-    Key key,
+    Key? key,
     this.curve = Curves.ease,
     this.duration = const Duration(milliseconds: 200),
     this.value = false,
@@ -114,7 +113,7 @@ class NeuSwitchNew extends StatelessWidget {
   static const MIN_EMBOSS_DEPTH = -1.0;
 
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
   final NeuSwitchNewStyle style;
   final double height;
   final Duration duration;
@@ -123,7 +122,7 @@ class NeuSwitchNew extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final NeuThemeData theme = NeuTheme.of(context);
+    final NeuThemeData? theme = NeuTheme.of(context);
     return SizedBox(
       height: height,
       child: AspectRatio(
@@ -134,7 +133,9 @@ class NeuSwitchNew extends StatelessWidget {
             if (!isEnabled) {
               return;
             }
-            onChanged(!value);
+            if (onChanged != null) {
+              onChanged!(!value);
+            }
           },
           child: NeuCard(
             // drawSurfaceAboveChild: false,
@@ -149,6 +150,7 @@ class NeuSwitchNew extends StatelessWidget {
             ),
             child: AnimatedScale(
               scale: isEnabled ? 1 : 0,
+              duration: const Duration(milliseconds: 500), // New
               child: AnimatedThumb(
                 curve: curve,
                 disableDepth: style.disableDepth,
@@ -173,7 +175,7 @@ class NeuSwitchNew extends StatelessWidget {
     }
   }
 
-  double get _thumbDepth {
+  double? get _thumbDepth {
     if (!isEnabled) {
       return 0;
     } else {
@@ -181,7 +183,7 @@ class NeuSwitchNew extends StatelessWidget {
     }
   }
 
-  CurveType get _getCurveType => style.curveType ?? CurveType.flat;
+  CurveType get _getCurveType => style.curveType;
 
   // double _getTrackDepth(double themeDepth) {
   //   //force negative to have emboss
@@ -189,11 +191,11 @@ class NeuSwitchNew extends StatelessWidget {
   //   return depth.clamp(Neumorphic.MIN_DEPTH, NeuSwitchNew.MIN_EMBOSS_DEPTH);
   // }
 
-  Color _getTrackColor(NeuThemeData theme) => value == true
-      ? style.activeTrackColor ?? theme.backgroundColor
-      : style.inactiveTrackColor ?? theme.backgroundColor;
+  Color _getTrackColor(NeuThemeData? theme) => value == true
+      ? style.activeTrackColor ?? theme!.backgroundColor
+      : style.inactiveTrackColor ?? theme!.backgroundColor;
 
-  Color _getThumbColor(NeuThemeData theme) {
+  Color _getThumbColor(NeuThemeData? theme) {
     // final Color color =
     //     value == true ? style.activeThumbColor : style.inactiveThumbColor;
     // return color ?? theme.backgroundColor;
@@ -203,7 +205,7 @@ class NeuSwitchNew extends StatelessWidget {
 
 class AnimatedThumb extends StatelessWidget {
   const AnimatedThumb({
-    Key key,
+    Key? key,
     this.thumbColor,
     this.alignment,
     this.duration,
@@ -213,19 +215,19 @@ class AnimatedThumb extends StatelessWidget {
     this.curve,
   }) : super(key: key);
 
-  final Color thumbColor;
-  final Alignment alignment;
-  final Duration duration;
-  final CurveType shape;
-  final double depth;
-  final Curve curve;
-  final bool disableDepth;
+  final Color? thumbColor;
+  final Alignment? alignment;
+  final Duration? duration;
+  final CurveType? shape;
+  final double? depth;
+  final Curve? curve;
+  final bool? disableDepth;
 
   @override
   Widget build(BuildContext context) => AnimatedAlign(
-        curve: curve,
-        alignment: alignment,
-        duration: duration,
+        curve: curve!,
+        alignment: alignment!,
+        duration: duration!,
         child: Padding(
           padding: const EdgeInsets.all(4.0),
           child: NeuCard(

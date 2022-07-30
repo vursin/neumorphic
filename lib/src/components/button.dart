@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../neumorphic.dart';
+import 'package:neumorphic/src/components/neu_card.dart';
+import 'package:neumorphic/src/params.dart';
 
 /// A Neumorphic design button.
 ///
@@ -15,14 +16,14 @@ class NeuButton extends StatefulWidget {
   /// If the [onPressed] is null than the button will be rendered as disabled.
   const NeuButton({
     required this.onPressed,
-    required this.child,
+    this.child,
     this.padding = const EdgeInsets.all(12.0),
     this.decoration,
     Key? key,
   }) : super(key: key);
 
   /// The widget to be shown on the button, usually a [Text] widget or an [Icon]
-  final Widget child;
+  final Widget? child;
 
   /// An override callback to perform when the button is pressed.
   ///
@@ -32,7 +33,7 @@ class NeuButton extends StatefulWidget {
   final VoidCallback onPressed;
 
   /// The padding insets to add around the [child]
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The decoration to paint behind the [child].
   ///
@@ -42,7 +43,7 @@ class NeuButton extends StatefulWidget {
   final NeumorphicDecoration? decoration;
 
   @override
-  _NeuButtonState createState() => _NeuButtonState();
+  State createState() => _NeuButtonState();
 }
 
 class _NeuButtonState extends State<NeuButton> {
@@ -72,7 +73,7 @@ class _NeuButtonState extends State<NeuButton> {
       onTap: widget.onPressed,
       child: NeuCard(
         curveType: _isPressed ? CurveType.concave : CurveType.flat,
-        padding: widget.padding,
+        padding: widget.padding as EdgeInsets?,
         alignment: Alignment.center,
         decoration: decoration,
         child: widget.child,

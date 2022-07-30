@@ -68,12 +68,12 @@ const Duration _kOpacityAnimationDuration = Duration(milliseconds: 470);
 
 const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
-class _FontWeightTween extends Tween<FontWeight> {
-  _FontWeightTween({FontWeight begin, FontWeight end})
+class _FontWeightTween extends Tween<FontWeight?> {
+  _FontWeightTween({FontWeight? begin, FontWeight? end})
       : super(begin: begin, end: end);
 
   @override
-  FontWeight lerp(double t) => FontWeight.lerp(begin, end, t);
+  FontWeight? lerp(double t) => FontWeight.lerp(begin, end, t);
 }
 
 /// A Neumorphic design Switch.
@@ -85,9 +85,9 @@ class NeuSwitch<T> extends StatefulWidget {
   /// [padding] properties of this widget are identical to the
   /// similarly-named properties on the [Switch] widget.
   NeuSwitch({
-    @required this.children,
-    @required this.onValueChanged,
-    Key key,
+    required this.children,
+    required this.onValueChanged,
+    Key? key,
     this.groupValue,
     this.thumbColor = _kThumbColor,
     this.padding = _kHorizontalItemPadding,
@@ -111,7 +111,7 @@ class NeuSwitch<T> extends StatefulWidget {
   ///
   /// This must be one of the keys in the [Map] of [children].
   /// If this attribute is null, no widget will be initially selected.
-  final T groupValue;
+  final T? groupValue;
 
   /// The callback that is called when a new option is tapped.
   ///
@@ -165,7 +165,7 @@ class NeuSwitch<T> extends StatefulWidget {
   ///
   /// The default value is [CupertinoColors.tertiarySystemFill]. The background
   /// will not be painted if null is specified.
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// The color used to paint the interior of the thumb that appears behind the
   /// currently selected item.
@@ -181,25 +181,25 @@ class NeuSwitch<T> extends StatefulWidget {
   final EdgeInsetsGeometry padding;
 
   @override
-  _NeuSwitchState<T> createState() => _NeuSwitchState<T>();
+  State<NeuSwitch<T?>> createState() => _NeuSwitchState<T>();
 }
 
 class _NeuSwitchState<T> extends State<NeuSwitch<T>>
     with TickerProviderStateMixin<NeuSwitch<T>> {
-  final Map<T, AnimationController> _highlightControllers =
+  final Map<T?, AnimationController> _highlightControllers =
       <T, AnimationController>{};
-  final Tween<FontWeight> _highlightTween =
+  final Tween<FontWeight?> _highlightTween =
       _FontWeightTween(begin: FontWeight.normal, end: FontWeight.w500);
 
-  final Map<T, AnimationController> _pressControllers =
+  final Map<T?, AnimationController> _pressControllers =
       <T, AnimationController>{};
   final Tween<double> _pressTween = Tween<double>(begin: 1, end: 0.2);
 
-  List<T> keys;
+  late List<T?> keys;
 
-  AnimationController thumbController;
-  AnimationController separatorOpacityController;
-  AnimationController thumbScaleController;
+  late AnimationController thumbController;
+  late AnimationController separatorOpacityController;
+  late AnimationController thumbScaleController;
 
   final TapGestureRecognizer tap = TapGestureRecognizer();
   final HorizontalDragGestureRecognizer drag =
@@ -253,7 +253,7 @@ class _NeuSwitchState<T> extends State<NeuSwitch<T>>
       vsync: this,
     );
 
-    for (T currentKey in widget.children.keys) {
+    for (T? currentKey in widget.children.keys) {
       _highlightControllers[currentKey] = _createHighlightAnimationController(
         isCompleted:
             currentKey == widget.groupValue, // Highlight the current selection.
@@ -267,17 +267,17 @@ class _NeuSwitchState<T> extends State<NeuSwitch<T>>
     super.didUpdateWidget(oldWidget);
 
     // Update animation controllers.
-    for (T oldKey in oldWidget.children.keys) {
+    for (T? oldKey in oldWidget.children.keys) {
       if (!widget.children.containsKey(oldKey)) {
-        _highlightControllers[oldKey].dispose();
-        _pressControllers[oldKey].dispose();
+        _highlightControllers[oldKey]!.dispose();
+        _pressControllers[oldKey]!.dispose();
 
         _highlightControllers.remove(oldKey);
         _pressControllers.remove(oldKey);
       }
     }
 
-    for (T newKey in widget.children.keys) {
+    for (T? newKey in widget.children.keys) {
       if (!_highlightControllers.keys.contains(newKey)) {
         _highlightControllers[newKey] = _createHighlightAnimationController();
         _pressControllers[newKey] = _createFadeoutAnimationController();
@@ -311,18 +311,18 @@ class _NeuSwitchState<T> extends State<NeuSwitch<T>>
 
   // Play highlight animation for the child located
   // at _highlightControllers[at].
-  void _animateHighlightController({T at, bool forward}) {
+  void _animateHighlightController({T? at, bool? forward}) {
     if (at == null) {
       return;
     }
-    final AnimationController controller = _highlightControllers[at];
-    assert(!forward || controller != null);
-    controller.animateTo(forward ? 1 : 0,
+    final AnimationController? controller = _highlightControllers[at];
+    assert(!forward! || controller != null);
+    controller?.animateTo(forward! ? 1 : 0,
         duration: _kHighlightAnimationDuration, curve: Curves.ease);
   }
 
-  T _highlighted;
-  set highlighted(T newValue) {
+  T? _highlighted;
+  set highlighted(T? newValue) {
     if (_highlighted == newValue) {
       return;
     }
@@ -331,7 +331,7 @@ class _NeuSwitchState<T> extends State<NeuSwitch<T>>
     _highlighted = newValue;
   }
 
-  T _pressed;
+  T? _pressed;
   set pressed(T newValue) {
     if (_pressed == newValue) {
       return;
@@ -342,17 +342,17 @@ class _NeuSwitchState<T> extends State<NeuSwitch<T>>
           duration: _kOpacityAnimationDuration, curve: Curves.ease);
     }
     if (newValue != _highlighted && newValue != null) {
-      _pressControllers[newValue].animateTo(1,
+      _pressControllers[newValue]!.animateTo(1,
           duration: _kOpacityAnimationDuration, curve: Curves.ease);
     }
     _pressed = newValue;
   }
 
   void didChangeSelectedViaGesture() {
-    widget.onValueChanged(_highlighted);
+    widget.onValueChanged(_highlighted as T);
   }
 
-  T indexToKey(int index) => index == null ? null : keys[index];
+  T? indexToKey(int? index) => index == null ? null : keys[index];
 
   @override
   Widget build(BuildContext context) {
@@ -372,13 +372,13 @@ class _NeuSwitchState<T> extends State<NeuSwitch<T>>
         ..._highlightControllers.values,
         ..._pressControllers.values,
       ]),
-      builder: (BuildContext context, Widget child) {
+      builder: (BuildContext context, Widget? child) {
         final List<Widget> children = <Widget>[];
-        for (T currentKey in keys) {
+        for (T? currentKey in keys) {
           final TextStyle textStyle =
               DefaultTextStyle.of(context).style.copyWith(
                     fontWeight: _highlightTween
-                        .evaluate(_highlightControllers[currentKey]),
+                        .evaluate(_highlightControllers[currentKey]!),
                   );
 
           final Widget child = DefaultTextStyle(
@@ -386,12 +386,12 @@ class _NeuSwitchState<T> extends State<NeuSwitch<T>>
             child: Semantics(
               button: true,
               onTap: () {
-                widget.onValueChanged(currentKey);
+                widget.onValueChanged(currentKey as T);
               },
               inMutuallyExclusiveGroup: true,
               selected: widget.groupValue == currentKey,
               child: Opacity(
-                opacity: _pressTween.evaluate(_pressControllers[currentKey]),
+                opacity: _pressTween.evaluate(_pressControllers[currentKey]!),
                 // Expand the hitTest area to be as large as the Opacity widget.
                 child: MetaData(
                   behavior: HitTestBehavior.opaque,
@@ -404,7 +404,7 @@ class _NeuSwitchState<T> extends State<NeuSwitch<T>>
           children.add(child);
         }
 
-        final int selectedIndex =
+        final int? selectedIndex =
             widget.groupValue == null ? null : keys.indexOf(widget.groupValue);
 
         final Widget box = _NeuSwitchRenderWidget<T>(
@@ -435,14 +435,14 @@ class _NeuSwitchState<T> extends State<NeuSwitch<T>>
 
 class _NeuSwitchRenderWidget<T> extends MultiChildRenderObjectWidget {
   _NeuSwitchRenderWidget({
-    @required this.selectedIndex,
-    @required this.thumbColor,
-    @required this.state,
-    Key key,
+    required this.selectedIndex,
+    required this.thumbColor,
+    required this.state,
+    Key? key,
     List<Widget> children = const <Widget>[],
   }) : super(key: key, children: children);
 
-  final int selectedIndex;
+  final int? selectedIndex;
   final Color thumbColor;
   final _NeuSwitchState<T> state;
 
@@ -464,7 +464,7 @@ class _NeuSwitchRenderWidget<T> extends MultiChildRenderObjectWidget {
 
 class _ChildAnimationManifest {
   _ChildAnimationManifest({
-    @required this.separatorOpacity,
+    required this.separatorOpacity,
     this.opacity = 1,
   })  : separatorTween =
             Tween<double>(begin: separatorOpacity, end: separatorOpacity),
@@ -519,9 +519,9 @@ class _RenderNeuSwitch<T> extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox,
             ContainerBoxParentData<RenderBox>> {
   _RenderNeuSwitch({
-    @required int selectedIndex,
-    @required Color thumbColor,
-    @required this.state,
+    required int? selectedIndex,
+    required Color thumbColor,
+    required this.state,
   })  : _highlightedIndex = selectedIndex,
         _thumbColor = thumbColor {
     state.drag
@@ -535,40 +535,40 @@ class _RenderNeuSwitch<T> extends RenderBox
     state.longPress.onLongPress = () {};
   }
 
-  final _NeuSwitchState<T> state;
+  final _NeuSwitchState<T?> state;
 
-  Map<RenderBox, _ChildAnimationManifest> _childAnimations =
+  Map<RenderBox, _ChildAnimationManifest>? _childAnimations =
       <RenderBox, _ChildAnimationManifest>{};
 
   // The current **Unscaled** Thumb Rect.
-  Rect currentThumbRect;
+  Rect? currentThumbRect;
 
-  Tween<Rect> _currentThumbTween;
+  Tween<Rect?>? _currentThumbTween;
 
   Tween<double> _thumbScaleTween =
       Tween<double>(begin: _kMinThumbScale, end: 1);
   double currentThumbScale = 1;
 
   // The current position of the active drag pointer.
-  Offset _localDragOffset;
+  Offset? _localDragOffset;
   // Whether the current drag gesture started on a selected segment.
-  bool _startedOnSelectedSegment;
+  bool? _startedOnSelectedSegment;
 
   @override
-  void insert(RenderBox child, {RenderBox after}) {
+  void insert(RenderBox child, {RenderBox? after}) {
     super.insert(child, after: after);
     if (_childAnimations == null) {
       return;
     }
 
-    assert(_childAnimations[child] == null);
-    _childAnimations[child] = _ChildAnimationManifest(separatorOpacity: 1);
+    assert(_childAnimations![child] == null);
+    _childAnimations![child] = _ChildAnimationManifest(separatorOpacity: 1);
   }
 
   @override
   void remove(RenderBox child) {
     super.remove(child);
-    _childAnimations.remove(child);
+    _childAnimations?.remove(child);
   }
 
   @override
@@ -592,9 +592,9 @@ class _RenderNeuSwitch<T> extends RenderBox
   // when true some animation tweens will be updated in paint phase.
   bool _needsThumbAnimationUpdate = false;
 
-  int get highlightedIndex => _highlightedIndex;
-  int _highlightedIndex;
-  set highlightedIndex(int value) {
+  int? get highlightedIndex => _highlightedIndex;
+  int? _highlightedIndex;
+  set highlightedIndex(int? value) {
     if (_highlightedIndex == value) {
       return;
     }
@@ -616,7 +616,7 @@ class _RenderNeuSwitch<T> extends RenderBox
     markNeedsSemanticsUpdate();
   }
 
-  void guardedSetHighlightedIndex(int value) {
+  void guardedSetHighlightedIndex(int? value) {
     // Ignore set highlightedIndex when the user is dragging the thumb around.
     if (_startedOnSelectedSegment == true) {
       return;
@@ -624,14 +624,14 @@ class _RenderNeuSwitch<T> extends RenderBox
     highlightedIndex = value;
   }
 
-  int get pressedIndex => _pressedIndex;
-  int _pressedIndex;
-  set pressedIndex(int value) {
+  int? get pressedIndex => _pressedIndex;
+  int? _pressedIndex;
+  set pressedIndex(int? value) {
     if (_pressedIndex == value) {
       return;
     }
 
-    assert((value >= 0 && value < childCount));
+    assert(value == null || (value >= 0 && value < childCount));
 
     _pressedIndex = value;
     state.pressed = state.indexToKey(value);
@@ -660,10 +660,10 @@ class _RenderNeuSwitch<T> extends RenderBox
     }
   }
 
-  int indexFromLocation(Offset location) => childCount == 0
+  int? indexFromLocation(Offset? location) => childCount == 0
       ? null
       // This assumes all children have the same width.
-      : (location.dx / (size.width / childCount))
+      : (location!.dx / (size.width / childCount))
           .floor()
           .clamp(0, childCount - 1);
 
@@ -675,20 +675,20 @@ class _RenderNeuSwitch<T> extends RenderBox
   void _onDown(DragDownDetails details) {
     assert(size.contains(details.localPosition));
     _localDragOffset = details.localPosition;
-    final int index = indexFromLocation(_localDragOffset);
+    final int? index = indexFromLocation(_localDragOffset);
     _startedOnSelectedSegment = index == highlightedIndex;
     pressedIndex = index;
 
-    if (_startedOnSelectedSegment) {
+    if (_startedOnSelectedSegment!) {
       _playThumbScaleAnimation(isExpanding: false);
     }
   }
 
   void _onUpdate(DragUpdateDetails details) {
     _localDragOffset = details.localPosition;
-    final int newIndex = indexFromLocation(_localDragOffset);
+    final int? newIndex = indexFromLocation(_localDragOffset);
 
-    if (_startedOnSelectedSegment) {
+    if (_startedOnSelectedSegment!) {
       highlightedIndex = newIndex;
       if (pressedIndex != newIndex) {
         state.didChangeSelectedViaGesture();
@@ -700,20 +700,22 @@ class _RenderNeuSwitch<T> extends RenderBox
   }
 
   void _onEnd(DragEndDetails details) {
-    if (_startedOnSelectedSegment) {
+    if (_startedOnSelectedSegment!) {
       _playThumbScaleAnimation(isExpanding: true);
       state.didChangeSelectedViaGesture();
     }
 
-    highlightedIndex = pressedIndex;
-    state.didChangeSelectedViaGesture();
+    if (pressedIndex != null) {
+      highlightedIndex = pressedIndex;
+      state.didChangeSelectedViaGesture();
+    }
     pressedIndex = null;
     _localDragOffset = null;
     _startedOnSelectedSegment = null;
   }
 
   void _onCancel() {
-    if (_startedOnSelectedSegment) {
+    if (_startedOnSelectedSegment!) {
       _playThumbScaleAnimation(isExpanding: true);
     }
 
@@ -722,7 +724,7 @@ class _RenderNeuSwitch<T> extends RenderBox
     _startedOnSelectedSegment = null;
   }
 
-  void _playThumbScaleAnimation({@required bool isExpanding}) {
+  void _playThumbScaleAnimation({required bool isExpanding}) {
     _thumbScaleTween =
         Tween<double>(begin: currentThumbScale, end: _kMinThumbScale);
     // state.thumbScaleController.animateWith(_kThumbSpringAnimationSimulation);
@@ -738,10 +740,11 @@ class _RenderNeuSwitch<T> extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     double maxMinChildWidth = 0;
     while (child != null) {
-      final _NeuSwitchContainerBoxParentData childParentData = child.parentData;
+      final _NeuSwitchContainerBoxParentData childParentData =
+          child.parentData as _NeuSwitchContainerBoxParentData;
       final double childWidth = child.getMinIntrinsicWidth(height);
       maxMinChildWidth = math.max(maxMinChildWidth, childWidth);
       child = childParentData.nextSibling;
@@ -752,10 +755,11 @@ class _RenderNeuSwitch<T> extends RenderBox
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     double maxMaxChildWidth = 0;
     while (child != null) {
-      final _NeuSwitchContainerBoxParentData childParentData = child.parentData;
+      final _NeuSwitchContainerBoxParentData childParentData =
+          child.parentData as _NeuSwitchContainerBoxParentData;
       final double childWidth = child.getMaxIntrinsicWidth(height);
       maxMaxChildWidth = math.max(maxMaxChildWidth, childWidth);
       child = childParentData.nextSibling;
@@ -766,10 +770,11 @@ class _RenderNeuSwitch<T> extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     double maxMinChildHeight = 0;
     while (child != null) {
-      final _NeuSwitchContainerBoxParentData childParentData = child.parentData;
+      final _NeuSwitchContainerBoxParentData childParentData =
+          child.parentData as _NeuSwitchContainerBoxParentData;
       final double childHeight = child.getMinIntrinsicHeight(width);
       maxMinChildHeight = math.max(maxMinChildHeight, childHeight);
       child = childParentData.nextSibling;
@@ -779,10 +784,11 @@ class _RenderNeuSwitch<T> extends RenderBox
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     double maxMaxChildHeight = 0;
     while (child != null) {
-      final _NeuSwitchContainerBoxParentData childParentData = child.parentData;
+      final _NeuSwitchContainerBoxParentData childParentData =
+          child.parentData as _NeuSwitchContainerBoxParentData;
       final double childHeight = child.getMaxIntrinsicHeight(width);
       maxMaxChildHeight = math.max(maxMaxChildHeight, childHeight);
       child = childParentData.nextSibling;
@@ -791,7 +797,7 @@ class _RenderNeuSwitch<T> extends RenderBox
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) =>
+  double? computeDistanceToActualBaseline(TextBaseline baseline) =>
       defaultComputeDistanceToHighestActualBaseline(baseline);
 
   @override
@@ -819,7 +825,7 @@ class _RenderNeuSwitch<T> extends RenderBox
       (constraints.maxWidth - totalSeparatorWidth) / childCount,
     );
 
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     while (child != null) {
       final double boxHeight = child.getMaxIntrinsicHeight(childWidth);
       maxHeight = math.max(maxHeight, boxHeight);
@@ -844,7 +850,8 @@ class _RenderNeuSwitch<T> extends RenderBox
     child = firstChild;
 
     while (child != null) {
-      final _NeuSwitchContainerBoxParentData childParentData = child.parentData;
+      final _NeuSwitchContainerBoxParentData childParentData =
+          child.parentData as _NeuSwitchContainerBoxParentData;
       final Offset childOffset = Offset(start, 0);
       childParentData.offset = childOffset;
       start +=
@@ -869,17 +876,17 @@ class _RenderNeuSwitch<T> extends RenderBox
           // last child will not be painted (unless
           // a new trailing segment is added), and its opacity will always be 1.
           final bool shouldFadeOut =
-              i == highlightedIndex || i == highlightedIndex - 1;
+              i == highlightedIndex || i == highlightedIndex! - 1;
           final RenderBox child = children[i];
-          _childAnimations[child] =
+          _childAnimations![child] =
               _ChildAnimationManifest(separatorOpacity: shouldFadeOut ? 0 : 1);
         }
       }
 
-      final RenderBox selectedChild = children[highlightedIndex];
+      final RenderBox selectedChild = children[highlightedIndex!];
 
       final _NeuSwitchContainerBoxParentData childParentData =
-          selectedChild.parentData;
+          selectedChild.parentData as _NeuSwitchContainerBoxParentData;
       final Rect unscaledThumbTargetRect = _kThumbInsets
           .inflateRect(childParentData.offset & selectedChild.size);
 
@@ -896,9 +903,9 @@ class _RenderNeuSwitch<T> extends RenderBox
           // a new segment is appended to the child list),
           // and its opacity will always be 1.
           final bool shouldFadeOut =
-              i == highlightedIndex || i == highlightedIndex - 1;
+              i == highlightedIndex || i == highlightedIndex! - 1;
           final RenderBox child = children[i];
-          final _ChildAnimationManifest manifest = _childAnimations[child];
+          final _ChildAnimationManifest manifest = _childAnimations![child]!;
           manifest.separatorTween = Tween<double>(
             begin: manifest.separatorOpacity,
             end: shouldFadeOut ? 0 : 1,
@@ -906,24 +913,25 @@ class _RenderNeuSwitch<T> extends RenderBox
         }
 
         _needsThumbAnimationUpdate = false;
-      } else if (unscaledThumbTargetRect != _currentThumbTween.begin) {
+      } else if (_currentThumbTween != null &&
+          unscaledThumbTargetRect != _currentThumbTween!.begin) {
         _currentThumbTween = RectTween(
-            begin: _currentThumbTween.begin, end: unscaledThumbTargetRect);
+            begin: _currentThumbTween!.begin, end: unscaledThumbTargetRect);
       }
 
       for (int index = 0; index < childCount - 1; index += 1) {
         _paintSeparator(context, offset, children[index]);
       }
 
-      currentThumbRect = _currentThumbTween.evaluate(state.thumbController) ??
+      currentThumbRect = _currentThumbTween?.evaluate(state.thumbController) ??
           unscaledThumbTargetRect;
 
       currentThumbScale = _thumbScaleTween.evaluate(state.thumbScaleController);
 
       final Rect thumbRect = Rect.fromCenter(
-        center: currentThumbRect.center,
-        width: currentThumbRect.width * currentThumbScale,
-        height: currentThumbRect.height * currentThumbScale,
+        center: currentThumbRect!.center,
+        width: currentThumbRect!.width * currentThumbScale,
+        height: currentThumbRect!.height * currentThumbScale,
       );
 
       _paintThumb(context, offset, thumbRect);
@@ -945,16 +953,17 @@ class _RenderNeuSwitch<T> extends RenderBox
   // Paint the separator to the right of the given child.
   void _paintSeparator(
       PaintingContext context, Offset offset, RenderBox child) {
-    final _NeuSwitchContainerBoxParentData childParentData = child.parentData;
+    final _NeuSwitchContainerBoxParentData childParentData =
+        child.parentData as _NeuSwitchContainerBoxParentData;
 
     final Paint paint = Paint();
 
-    final _ChildAnimationManifest manifest =
-        _childAnimations == null ? null : _childAnimations[child];
+    final _ChildAnimationManifest? manifest =
+        _childAnimations == null ? null : _childAnimations![child];
     final double opacity =
-        manifest.separatorTween.evaluate(state.separatorOpacityController) ??
+        manifest?.separatorTween.evaluate(state.separatorOpacityController) ??
             1;
-    manifest.separatorOpacity = opacity;
+    manifest?.separatorOpacity = opacity;
     paint.color =
         _kSeparatorColor.withOpacity(_kSeparatorColor.opacity * opacity);
 
@@ -973,11 +982,17 @@ class _RenderNeuSwitch<T> extends RenderBox
 
   void _paintChild(
       PaintingContext context, Offset offset, RenderBox child, int childIndex) {
-    final _NeuSwitchContainerBoxParentData childParentData = child.parentData;
+    final _NeuSwitchContainerBoxParentData childParentData =
+        child.parentData as _NeuSwitchContainerBoxParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 
-  void _paintThumb(PaintingContext context, Offset offset, Rect thumbRect) {
+  void _paintThumb(
+    PaintingContext context,
+    Offset offset,
+    Rect thumbRect, {
+    bool isConcave = true,
+  }) {
     // Colors extracted from https://developer.apple.com/design/resources/.
     const List<BoxShadow> thumbShadow = <BoxShadow>[
       BoxShadow(
@@ -998,21 +1013,21 @@ class _RenderNeuSwitch<T> extends RenderBox
       ),
     ];
 
-    const isConcave = true;
+    // const isConcave = true;
     final color = thumbColor;
 
     final gradient = RadialGradient(
       // begin: Alignment.topLeft,
       // end: Alignment.bottomRight,
       colors: [
-        isConcave ? Color.lerp(color, Colors.black, .01) : color,
+        isConcave ? Color.lerp(color, Colors.black, .01)! : color,
         isConcave
-            ? Color.lerp(color, Colors.white, .01)
-            : Color.lerp(color, Colors.black, .01),
+            ? Color.lerp(color, Colors.white, .01)!
+            : Color.lerp(color, Colors.black, .01)!,
         isConcave
-            ? Color.lerp(color, Colors.white, .01)
-            : Color.lerp(color, Colors.black, .01),
-        isConcave ? Color.lerp(color, Colors.black, .01) : color,
+            ? Color.lerp(color, Colors.white, .01)!
+            : Color.lerp(color, Colors.black, .01)!,
+        isConcave ? Color.lerp(color, Colors.black, .01)! : color,
       ],
       stops: const [
         0.0,
@@ -1045,10 +1060,11 @@ class _RenderNeuSwitch<T> extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {@required Offset position}) {
-    RenderBox child = lastChild;
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    RenderBox? child = lastChild;
     while (child != null) {
-      final _NeuSwitchContainerBoxParentData childParentData = child.parentData;
+      final _NeuSwitchContainerBoxParentData childParentData =
+          child.parentData as _NeuSwitchContainerBoxParentData;
       if ((childParentData.offset & child.size).contains(position)) {
         final Offset center = (Offset.zero & child.size).center;
         return result.addWithRawTransform(
@@ -1056,7 +1072,7 @@ class _RenderNeuSwitch<T> extends RenderBox
           position: center,
           hitTest: (BoxHitTestResult result, Offset position) {
             assert(position == center);
-            return child.hitTest(result, position: center);
+            return child!.hitTest(result, position: center);
           },
         );
       }

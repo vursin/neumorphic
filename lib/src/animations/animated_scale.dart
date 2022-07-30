@@ -22,34 +22,36 @@ import 'package:flutter/widgets.dart';
 ///
 class AnimatedScale extends StatefulWidget {
   const AnimatedScale({
-    required this.child,
+    Key? key,
+    this.child,
     this.scale = 1,
     this.duration = const Duration(milliseconds: 150),
-  });
+  }) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
   final double scale;
   final Duration duration;
 
   @override
-  _AnimatedScaleState createState() => _AnimatedScaleState();
+  State createState() => _AnimatedScaleState();
 }
 
 class _AnimatedScaleState extends State<AnimatedScale>
     with TickerProviderStateMixin {
-  late AnimationController _controller;
+  AnimationController? _controller;
   late Animation<double> _animation;
   double scale = 1;
 
   void _onScaleChanged(double newScale) {
-    _controller.reset();
-    _animation = Tween<double>(begin: scale, end: newScale).animate(_controller)
-      ..addListener(() {
-        setState(() {
-          scale = _animation.value;
-        });
-      });
-    _controller.forward();
+    _controller!.reset();
+    _animation =
+        Tween<double>(begin: scale, end: newScale).animate(_controller!)
+          ..addListener(() {
+            setState(() {
+              scale = _animation.value;
+            });
+          });
+    _controller!.forward();
   }
 
   @override
@@ -69,7 +71,7 @@ class _AnimatedScaleState extends State<AnimatedScale>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 

@@ -10,12 +10,12 @@ import 'package:flutter/foundation.dart';
 ///
 @immutable
 class LightSource {
-  final double dx;
-  final double dy;
 
   const LightSource(this.dx, this.dy);
+  final double? dx;
+  final double? dy;
 
-  Offset get offset => Offset(dx, dy);
+  Offset get offset => Offset(dx!, dy!);
 
   static const top = LightSource(0, -1);
   static const topLeft = LightSource(-1, -1);
@@ -36,18 +36,14 @@ class LightSource {
   @override
   int get hashCode => offset.hashCode;
 
-  Offset toOffset(double distance) {
-    return offset.scale(distance, distance);
-  }
+  Offset toOffset(double distance) => offset.scale(distance, distance);
 
   @override
-  String toString() {
-    return 'LightSource{dx: $dx, dy: $dy}';
-  }
+  String toString() => 'LightSource{dx: $dx, dy: $dy}';
 
-  LightSource invert() => LightSource(dx * -1, dy * -1);
+  LightSource invert() => LightSource(dx! * -1, dy! * -1);
 
-  static LightSource lerp(LightSource a, LightSource b, double t) {
+  static LightSource? lerp(LightSource a, LightSource b, double t) {
 
     if (a == null && b == null) return null;
     if (a == null) return b;
@@ -63,12 +59,10 @@ class LightSource {
   }
 
   LightSource copyWith({
-    double dx,
-    double dy,
-  }) {
-    return LightSource(
+    double? dx,
+    double? dy,
+  }) => LightSource(
       dx ?? this.dx,
       dy ?? this.dy,
     );
-  }
 }

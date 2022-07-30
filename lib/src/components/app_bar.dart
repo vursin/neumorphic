@@ -12,7 +12,7 @@ class NeuAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// which places the app bar as a fixed-height widget at the top of the screen.
   const NeuAppBar({
     this.leading,
-    required this.title,
+    this.title,
     Key? key,
   }) : super(key: key);
 
@@ -21,16 +21,16 @@ class NeuAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
 
   /// The [title] widget displayed after the [leading] on AppBar.
-  final Widget title;
+  final Widget? title;
 
   @override
   Widget build(BuildContext context) {
     final MediaQueryData media = MediaQuery.of(context);
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final ModalRoute parentRoute = ModalRoute.of(context);
+    final ModalRoute<dynamic>? parentRoute = ModalRoute.of(context);
     final ScaffoldState? scaffold = Scaffold.maybeOf(context);
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
-    final bool canPop = parentRoute.canPop ?? false;
+    final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton =
         parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
@@ -46,10 +46,12 @@ class NeuAppBar extends StatelessWidget implements PreferredSizeWidget {
         leading = useCloseButton ? const CloseButton() : const NeuBackButton();
       }
     }
-    leading = ConstrainedBox(
-      constraints: const BoxConstraints.tightFor(width: cToolbarHeight),
-      child: leading,
-    );
+    if (leading != null) {
+      leading = ConstrainedBox(
+        constraints: const BoxConstraints.tightFor(width: cToolbarHeight),
+        child: leading,
+      );
+    }
 
     return Container(
       margin: EdgeInsets.only(top: media.padding.top),
@@ -61,13 +63,13 @@ class NeuAppBar extends StatelessWidget implements PreferredSizeWidget {
               padding: const EdgeInsets.all(16)
                   .copyWith(right: (leading != null) ? cToolbarHeight : 0),
               child: DefaultTextStyle(
-                style: textTheme.headline5.copyWith(
+                style: textTheme.headline5!.copyWith(
                   /// TODO(noname): (ISSUE) Causes part of text below baseline to not show
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
                 ),
                 textAlign: TextAlign.center,
-                child: title,
+                child: title!,
               ),
             ),
           ),

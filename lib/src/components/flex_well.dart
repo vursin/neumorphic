@@ -14,11 +14,11 @@ class FlexWell extends StatefulWidget {
   final void Function()? onTap;
   final String? text;
   final Icon? icon;
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
   final Color? color;
   final TextStyle? style;
   @override
-  _FlexWellState createState() => _FlexWellState();
+  State createState() => _FlexWellState();
 }
 
 class _FlexWellState extends State<FlexWell> {
@@ -29,9 +29,9 @@ class _FlexWellState extends State<FlexWell> {
   Widget build(BuildContext context) {
     final EdgeInsetsGeometry padding =
         widget.padding ?? const EdgeInsets.fromLTRB(10, 12, 10, 12);
-    Widget child;
+    Widget? child;
 
-    if (widget.text != null) {
+    if (widget.text.toString() != null.toString()) {
       // text is not null or a String representation of null
       child = Text(
         _toUpperCamelCase(widget.text!),
@@ -42,7 +42,7 @@ class _FlexWellState extends State<FlexWell> {
             ),
       );
     } else {
-      child = widget.icon!;
+      child = widget.icon;
     }
 
     child = Container(

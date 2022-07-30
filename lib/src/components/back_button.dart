@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../neumorphic.dart';
+import 'package:neumorphic/neumorphic.dart';
 
 /// Neumorphic design back button
 class NeuBackButton extends StatelessWidget {
